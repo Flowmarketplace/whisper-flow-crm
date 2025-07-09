@@ -60,7 +60,7 @@ const Agents = () => {
             name: "Zárate Publicidad Panamá",
             description: "Asistente de atención al cliente para servicios de impresión digital. Maneja consultas sobre productos, cotizaciones y soporte técnico las 24 horas.",
             status: "running",
-            webhookUrl: "https://n8n.example.com/webhook/zarate-panama",
+            webhookUrl: "https://n8n-n8n.sax8vb.easypanel.host/webhook/Zarate-panama",
             lastTriggered: "2 minutes ago",
             messagesHandled: 145,
             tools: ["WhatsApp", "OpenAI GPT-4", "Evolution API", "Postgres", "Webhook"],
