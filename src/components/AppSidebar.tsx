@@ -8,11 +8,14 @@ import {
   Webhook, 
   Key, 
   Activity,
-  GitBranch
+  GitBranch,
+  LogOut,
+  User
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -21,6 +24,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -33,6 +38,7 @@ const items = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
@@ -84,6 +90,35 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border-t border-slate-800 p-4">
+        {!collapsed && (
+          <>
+            <div className="flex items-center gap-2 mb-2 text-slate-300">
+              <User size={16} />
+              <span className="text-sm truncate">{user?.email}</span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={signOut}
+              className="w-full border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800"
+            >
+              <LogOut size={16} className="mr-2" />
+              Cerrar Sesión
+            </Button>
+          </>
+        )}
+        {collapsed && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={signOut}
+            className="w-full border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 p-2"
+          >
+            <LogOut size={16} />
+          </Button>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }
