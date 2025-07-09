@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Play, Pause, Settings, Search, Activity, AlertCircle, Video, Image, Power, PowerOff } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Play, Pause, Settings, Search, Activity, AlertCircle, Video, Image, Power, PowerOff, ChevronDown, Zap, Send, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PhoneMockup from "@/components/PhoneMockup";
 import ToolIcon from "@/components/ToolIcon";
@@ -13,6 +14,8 @@ import ToolIcon from "@/components/ToolIcon";
 const Agents = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [webhookTesting, setWebhookTesting] = useState<{ [key: number]: boolean }>({});
+  const [webhookResults, setWebhookResults] = useState<{ [key: number]: { success: boolean, message: string, timestamp: string } | null }>({});
   const [agents, setAgents] = useState([
     {
       id: 1,
@@ -101,6 +104,74 @@ const Agents = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const testWebhook = async (agentId: number) => {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent || !agent.webhookUrl) return;
+
+    setWebhookTesting(prev => ({ ...prev, [agentId]: true }));
+    
+    try {
+      const response = await fetch(agent.webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          test: true,
+          agent_id: agentId,
+          agent_name: agent.name,
+          timestamp: new Date().toISOString(),
+          message: "Prueba de webhook desde la plataforma"
+        }),
+      });
+
+      const success = response.ok;
+      const message = success ? "Webhook activado exitosamente" : `Error: ${response.status} ${response.statusText}`;
+      
+      setWebhookResults(prev => ({
+        ...prev,
+        [agentId]: {
+          success,
+          message,
+          timestamp: new Date().toLocaleString()
+        }
+      }));
+
+      toast({
+        title: success ? "Webhook Exitoso" : "Error en Webhook",
+        description: message,
+        variant: success ? "default" : "destructive",
+      });
+
+    } catch (error) {
+      const message = `Error de conexión: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      setWebhookResults(prev => ({
+        ...prev,
+        [agentId]: {
+          success: false,
+          message,
+          timestamp: new Date().toLocaleString()
+        }
+      }));
+
+      toast({
+        title: "Error en Webhook",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setWebhookTesting(prev => ({ ...prev, [agentId]: false }));
+    }
+  };
+
+  const updateWebhookUrl = (agentId: number, newUrl: string) => {
+    setAgents(prev => prev.map(agent => 
+      agent.id === agentId 
+        ? { ...agent, webhookUrl: newUrl }
+        : agent
+    ));
   };
 
   const getStatusColor = (status: string) => {
@@ -236,6 +307,79 @@ const Agents = () => {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  {/* Webhook Testing Section */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center space-x-2 w-full">
+                        <Button variant="outline" className="w-full justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Zap className="w-4 h-4" />
+                            <span>Probar Webhook N8N</span>
+                          </div>
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-4 pt-4">
+                        <div className="space-y-3">
+                          <label className="text-sm font-medium text-card-foreground">URL del Webhook</label>
+                          <div className="flex space-x-2">
+                            <Input
+                              value={agent.webhookUrl}
+                              onChange={(e) => updateWebhookUrl(agent.id, e.target.value)}
+                              placeholder="https://tu-n8n-instance.com/webhook/tu-webhook"
+                              className="flex-1"
+                            />
+                            <Button 
+                              onClick={() => testWebhook(agent.id)}
+                              disabled={webhookTesting[agent.id] || !agent.webhookUrl}
+                              className="shrink-0"
+                            >
+                              {webhookTesting[agent.id] ? (
+                                <>
+                                  <Activity className="w-4 h-4 mr-2 animate-spin" />
+                                  Probando...
+                                </>
+                              ) : (
+                                <>
+                                  <Send className="w-4 h-4 mr-2" />
+                                  Probar
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {webhookResults[agent.id] && (
+                          <div className={`p-4 rounded-lg border ${
+                            webhookResults[agent.id]?.success 
+                              ? 'bg-emerald-500/10 border-emerald-500/20' 
+                              : 'bg-red-500/10 border-red-500/20'
+                          }`}>
+                            <div className="flex items-start space-x-3">
+                              {webhookResults[agent.id]?.success ? (
+                                <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5" />
+                              ) : (
+                                <XCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                              )}
+                              <div className="flex-1">
+                                <p className={`font-medium ${
+                                  webhookResults[agent.id]?.success 
+                                    ? 'text-emerald-700 dark:text-emerald-300' 
+                                    : 'text-red-700 dark:text-red-300'
+                                }`}>
+                                  {webhookResults[agent.id]?.message}
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {webhookResults[agent.id]?.timestamp}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
 
                   {/* Stats */}
