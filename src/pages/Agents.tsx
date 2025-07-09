@@ -4,12 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, Settings, Plus, Search, Activity, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Play, Pause, Settings, Search, Activity, AlertCircle, Video, Image, Power, PowerOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PhoneMockup from "@/components/PhoneMockup";
+import ToolIcon from "@/components/ToolIcon";
 
 const Agents = () => {
   const { toast } = useToast();
@@ -17,40 +16,61 @@ const Agents = () => {
   const [agents, setAgents] = useState([
     {
       id: 1,
-      name: "Customer Support Agent",
-      description: "Handles customer inquiries and support tickets",
+      name: "Zárate Publicidad Panamá",
+      description: "Asistente de atención al cliente para servicios de impresión digital. Maneja consultas sobre productos, cotizaciones y soporte técnico las 24 horas.",
       status: "running",
-      webhookUrl: "https://n8n.example.com/webhook/customer-support",
+      webhookUrl: "https://n8n.example.com/webhook/zarate-panama",
       lastTriggered: "2 minutes ago",
       messagesHandled: 145,
+      tools: ["WhatsApp", "OpenAI GPT-4", "Evolution API", "Postgres", "Webhook"],
+      image: "/api/placeholder/400/240",
+      video: "/api/placeholder/video/demo.mp4",
+      phoneDemo: [
+        { id: 1, content: "Hola 👋 Gracias por escribir a Zárate Publicidad Panamá 🖨", sender: "bot" as const, timestamp: "10:30" },
+        { id: 2, content: "Buenos días, necesito un banner de 3x2 metros", sender: "user" as const, timestamp: "10:31" },
+        { id: 3, content: "Perfecto ✅ Para ayudarte mejor, ¿es para interior o exterior?", sender: "bot" as const, timestamp: "10:31" },
+        { id: 4, content: "Para exterior", sender: "user" as const, timestamp: "10:32" },
+        { id: 5, content: "¡Excelente! Te envío una cotización en breve 📋", sender: "bot" as const, timestamp: "10:32" }
+      ]
     },
     {
       id: 2,
-      name: "Lead Generation",
-      description: "Processes new leads and qualification",
+      name: "Lead Qualification System",
+      description: "Sistema automatizado para calificar leads entrantes. Analiza información de contacto, hace preguntas de calificación y deriva a los vendedores apropiados.",
       status: "paused",
       webhookUrl: "https://n8n.example.com/webhook/lead-gen",
       lastTriggered: "1 hour ago",
       messagesHandled: 67,
+      tools: ["Google Sheets", "OpenAI GPT-4", "Gmail", "Webhook", "Zapier"],
+      image: "/api/placeholder/400/240",
+      video: "/api/placeholder/video/leads.mp4",
+      phoneDemo: [
+        { id: 1, content: "¡Hola! Veo que estás interesado en nuestros servicios", sender: "bot" as const, timestamp: "14:20" },
+        { id: 2, content: "Sí, me gustaría saber más sobre sus productos", sender: "user" as const, timestamp: "14:21" },
+        { id: 3, content: "¿Cuál es el tamaño de tu empresa?", sender: "bot" as const, timestamp: "14:21" },
+        { id: 4, content: "Somos una empresa mediana, unos 50 empleados", sender: "user" as const, timestamp: "14:22" },
+        { id: 5, content: "Perfecto, te conectaré con nuestro especialista", sender: "bot" as const, timestamp: "14:22" }
+      ]
     },
     {
       id: 3,
-      name: "Sales Follow-up",
-      description: "Automated follow-up sequences for prospects",
+      name: "Appointment Scheduler Pro",
+      description: "Gestor inteligente de citas que se sincroniza con Google Calendar. Maneja confirmaciones, reagendamientos y recordatorios automáticos.",
       status: "running",
-      webhookUrl: "https://n8n.example.com/webhook/sales-followup",
+      webhookUrl: "https://n8n.example.com/webhook/scheduler",
       lastTriggered: "15 minutes ago",
       messagesHandled: 89,
-    },
-    {
-      id: 4,
-      name: "Appointment Scheduler",
-      description: "Manages meeting bookings and calendar sync",
-      status: "stopped",
-      webhookUrl: "https://n8n.example.com/webhook/scheduler",
-      lastTriggered: "3 hours ago",
-      messagesHandled: 23,
-    },
+      tools: ["Google Calendar", "WhatsApp", "OpenAI GPT-3.5", "Notion", "Scheduler"],
+      image: "/api/placeholder/400/240",
+      video: "/api/placeholder/video/scheduler.mp4",
+      phoneDemo: [
+        { id: 1, content: "¿Te gustaría agendar una reunión?", sender: "bot" as const, timestamp: "09:15" },
+        { id: 2, content: "Sí, para el viernes si es posible", sender: "user" as const, timestamp: "09:16" },
+        { id: 3, content: "Tengo disponible viernes 14:00 o 16:30. ¿Cuál prefieres?", sender: "bot" as const, timestamp: "09:16" },
+        { id: 4, content: "Las 14:00 está perfecto", sender: "user" as const, timestamp: "09:17" },
+        { id: 5, content: "¡Listo! Cita agendada para viernes 14:00. Te envío confirmación", sender: "bot" as const, timestamp: "09:17" }
+      ]
+    }
   ]);
 
   const toggleAgent = async (agentId: number) => {
@@ -85,10 +105,10 @@ const Agents = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "running": return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "paused": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "running": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+      case "paused": return "bg-amber-500/20 text-amber-400 border-amber-500/30";
       case "stopped": return "bg-red-500/20 text-red-400 border-red-500/30";
-      default: return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -107,137 +127,146 @@ const Agents = () => {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-slate-950 min-h-full">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Agent Management</h1>
-          <p className="text-slate-400">Control and monitor your n8n workflow agents</p>
+    <div className="min-h-screen bg-background">
+      <div className="p-6 space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold text-foreground">Gestión de Agentes</h1>
+          <p className="text-muted-foreground text-lg">
+            Controla y monitorea tus agentes de automatización inteligente
+          </p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Agent
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-slate-900 border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">Add New Agent</DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Connect a new n8n workflow to your CRM
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="agentName" className="text-slate-300">Agent Name</Label>
-                <Input id="agentName" placeholder="e.g., Customer Support Bot" className="bg-slate-800 border-slate-700 text-white" />
+
+        {/* Search */}
+        <div className="relative max-w-md mx-auto">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Buscar agentes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-card border-border"
+          />
+        </div>
+
+        {/* Agents */}
+        <div className="space-y-12">
+          {filteredAgents.map((agent) => (
+            <div key={agent.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-lg">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
+                
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Header with Status */}
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <h2 className="text-2xl font-bold text-card-foreground">{agent.name}</h2>
+                        <Badge className={getStatusColor(agent.status)}>
+                          {getStatusIcon(agent.status)}
+                          <span className="ml-2 capitalize">{agent.status}</span>
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {agent.description}
+                      </p>
+                    </div>
+                    
+                    {/* Power Switch */}
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2">
+                        <PowerOff className="w-4 h-4 text-muted-foreground" />
+                        <Switch
+                          checked={agent.status === "running"}
+                          onCheckedChange={() => toggleAgent(agent.id)}
+                        />
+                        <Power className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <Button size="sm" variant="outline">
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Tools Section */}
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-card-foreground flex items-center">
+                      <Settings className="w-5 h-5 mr-2" />
+                      Herramientas Conectadas
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {agent.tools.map((tool, index) => (
+                        <div key={index} className="flex items-center space-x-2 bg-secondary px-3 py-2 rounded-lg">
+                          <ToolIcon toolName={tool} className="w-4 h-4 text-secondary-foreground" />
+                          <span className="text-sm font-medium text-secondary-foreground">{tool}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Media Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Image */}
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-card-foreground flex items-center">
+                        <Image className="w-5 h-5 mr-2" />
+                        Vista del Flujo
+                      </h3>
+                      <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                        <img 
+                          src={agent.image} 
+                          alt={`${agent.name} workflow`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      </div>
+                    </div>
+
+                    {/* Video */}
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-card-foreground flex items-center">
+                        <Video className="w-5 h-5 mr-2" />
+                        Demo Explicativo
+                      </h3>
+                      <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                        <video 
+                          src={agent.video} 
+                          className="w-full h-full object-cover"
+                          controls
+                          poster={agent.image}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-border">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-card-foreground">{agent.messagesHandled}</p>
+                      <p className="text-sm text-muted-foreground">Mensajes Procesados</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-card-foreground">{agent.lastTriggered}</p>
+                      <p className="text-sm text-muted-foreground">Última Actividad</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone Mockup */}
+                <div className="flex justify-center">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-card-foreground text-center">
+                      Ejemplo en Vivo
+                    </h3>
+                    <PhoneMockup 
+                      messages={agent.phoneDemo} 
+                      agentName={agent.name}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="description" className="text-slate-300">Description</Label>
-                <Textarea id="description" placeholder="What does this agent do?" className="bg-slate-800 border-slate-700 text-white" />
-              </div>
-              <div>
-                <Label htmlFor="webhookUrl" className="text-slate-300">Webhook URL</Label>
-                <Input id="webhookUrl" placeholder="https://n8n.example.com/webhook/..." className="bg-slate-800 border-slate-700 text-white" />
-              </div>
-              <div>
-                <Label htmlFor="initialStatus" className="text-slate-300">Initial Status</Label>
-                <Select>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="paused">Paused</SelectItem>
-                    <SelectItem value="running">Running</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                Add Agent
-              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-        <Input
-          placeholder="Search agents..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-slate-900/50 border-slate-800 text-white placeholder-slate-400"
-        />
-      </div>
-
-      {/* Agents Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredAgents.map((agent) => (
-          <Card key={agent.id} className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <CardTitle className="text-white">{agent.name}</CardTitle>
-                  <Badge className={getStatusColor(agent.status)}>
-                    {getStatusIcon(agent.status)}
-                    <span className="ml-1 capitalize">{agent.status}</span>
-                  </Badge>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-slate-400 hover:text-white"
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </div>
-              <CardDescription className="text-slate-400">
-                {agent.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-slate-400">Last Triggered</p>
-                  <p className="text-white font-medium">{agent.lastTriggered}</p>
-                </div>
-                <div>
-                  <p className="text-slate-400">Messages Handled</p>
-                  <p className="text-white font-medium">{agent.messagesHandled}</p>
-                </div>
-              </div>
-              
-              <div className="pt-4 border-t border-slate-800">
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={() => toggleAgent(agent.id)}
-                    className={
-                      agent.status === "running"
-                        ? "flex-1 bg-red-600 hover:bg-red-700"
-                        : "flex-1 bg-green-600 hover:bg-green-700"
-                    }
-                  >
-                    {agent.status === "running" ? (
-                      <>
-                        <Pause className="w-4 h-4 mr-2" />
-                        Pause
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        Start
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                    <Settings className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
