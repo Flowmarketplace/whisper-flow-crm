@@ -7,7 +7,8 @@ import {
   MessageCircle, 
   Webhook, 
   Key, 
-  Activity 
+  Activity,
+  GitBranch
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,7 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Agents", url: "/agents", icon: Bot },
   { title: "WhatsApp", url: "/whatsapp", icon: MessageCircle },
+  { title: "Pipeline", url: "/pipeline", icon: GitBranch },
   { title: "Webhooks", url: "/webhooks", icon: Webhook },
   { title: "Credentials", url: "/credentials", icon: Key },
 ];

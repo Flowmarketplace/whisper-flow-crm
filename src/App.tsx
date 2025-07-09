@@ -12,6 +12,7 @@ import Agents from "./pages/Agents";
 import WhatsApp from "./pages/WhatsApp";
 import Webhooks from "./pages/Webhooks";
 import Credentials from "./pages/Credentials";
+import Pipeline from "./pages/Pipeline";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
                   <Route path="/whatsapp" element={<WhatsApp />} />
                   <Route path="/webhooks" element={<Webhooks />} />
                   <Route path="/credentials" element={<Credentials />} />
+                  <Route path="/pipeline" element={<Pipeline />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
