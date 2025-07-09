@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,82 +10,136 @@ import { Play, Pause, Settings, Search, Activity, AlertCircle, Video, Image, Pow
 import { useToast } from "@/hooks/use-toast";
 import PhoneMockup from "@/components/PhoneMockup";
 import ToolIcon from "@/components/ToolIcon";
+import { supabase } from "@/integrations/supabase/client";
 
 const Agents = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [webhookTesting, setWebhookTesting] = useState<{ [key: number]: boolean }>({});
-  const [webhookResults, setWebhookResults] = useState<{ [key: number]: { success: boolean, message: string, timestamp: string } | null }>({});
-  const [agents, setAgents] = useState([
-    {
-      id: 1,
-      name: "Zárate Publicidad Panamá",
-      description: "Asistente de atención al cliente para servicios de impresión digital. Maneja consultas sobre productos, cotizaciones y soporte técnico las 24 horas.",
-      status: "running",
-      webhookUrl: "https://n8n.example.com/webhook/zarate-panama",
-      lastTriggered: "2 minutes ago",
-      messagesHandled: 145,
-      tools: ["WhatsApp", "OpenAI GPT-4", "Evolution API", "Postgres", "Webhook"],
-      image: "/api/placeholder/400/240",
-      video: "/api/placeholder/video/demo.mp4",
-      phoneDemo: [
-        { id: 1, content: "Hola 👋 Gracias por escribir a Zárate Publicidad Panamá 🖨", sender: "bot" as const, timestamp: "10:30" },
-        { id: 2, content: "Buenos días, necesito un banner de 3x2 metros", sender: "user" as const, timestamp: "10:31" },
-        { id: 3, content: "Perfecto ✅ Para ayudarte mejor, ¿es para interior o exterior?", sender: "bot" as const, timestamp: "10:31" },
-        { id: 4, content: "Para exterior", sender: "user" as const, timestamp: "10:32" },
-        { id: 5, content: "¡Excelente! Te envío una cotización en breve 📋", sender: "bot" as const, timestamp: "10:32" }
-      ]
-    },
-    {
-      id: 2,
-      name: "Lead Qualification System",
-      description: "Sistema automatizado para calificar leads entrantes. Analiza información de contacto, hace preguntas de calificación y deriva a los vendedores apropiados.",
-      status: "paused",
-      webhookUrl: "https://n8n.example.com/webhook/lead-gen",
-      lastTriggered: "1 hour ago",
-      messagesHandled: 67,
-      tools: ["Google Sheets", "OpenAI GPT-4", "Gmail", "Webhook", "Zapier"],
-      image: "/api/placeholder/400/240",
-      video: "/api/placeholder/video/leads.mp4",
-      phoneDemo: [
-        { id: 1, content: "¡Hola! Veo que estás interesado en nuestros servicios", sender: "bot" as const, timestamp: "14:20" },
-        { id: 2, content: "Sí, me gustaría saber más sobre sus productos", sender: "user" as const, timestamp: "14:21" },
-        { id: 3, content: "¿Cuál es el tamaño de tu empresa?", sender: "bot" as const, timestamp: "14:21" },
-        { id: 4, content: "Somos una empresa mediana, unos 50 empleados", sender: "user" as const, timestamp: "14:22" },
-        { id: 5, content: "Perfecto, te conectaré con nuestro especialista", sender: "bot" as const, timestamp: "14:22" }
-      ]
-    },
-    {
-      id: 3,
-      name: "Appointment Scheduler Pro",
-      description: "Gestor inteligente de citas que se sincroniza con Google Calendar. Maneja confirmaciones, reagendamientos y recordatorios automáticos.",
-      status: "running",
-      webhookUrl: "https://n8n.example.com/webhook/scheduler",
-      lastTriggered: "15 minutes ago",
-      messagesHandled: 89,
-      tools: ["Google Calendar", "WhatsApp", "OpenAI GPT-3.5", "Notion", "Scheduler"],
-      image: "/api/placeholder/400/240",
-      video: "/api/placeholder/video/scheduler.mp4",
-      phoneDemo: [
-        { id: 1, content: "¿Te gustaría agendar una reunión?", sender: "bot" as const, timestamp: "09:15" },
-        { id: 2, content: "Sí, para el viernes si es posible", sender: "user" as const, timestamp: "09:16" },
-        { id: 3, content: "Tengo disponible viernes 14:00 o 16:30. ¿Cuál prefieres?", sender: "bot" as const, timestamp: "09:16" },
-        { id: 4, content: "Las 14:00 está perfecto", sender: "user" as const, timestamp: "09:17" },
-        { id: 5, content: "¡Listo! Cita agendada para viernes 14:00. Te envío confirmación", sender: "bot" as const, timestamp: "09:17" }
-      ]
-    }
-  ]);
+  const [webhookTesting, setWebhookTesting] = useState<{ [key: string]: boolean }>({});
+  const [webhookResults, setWebhookResults] = useState<{ [key: string]: { success: boolean, message: string, timestamp: string } | null }>({});
+  const [agents, setAgents] = useState<any[]>([]);
+  const [credentials, setCredentials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggleAgent = async (agentId: number) => {
-    const agent = agents.find(a => a.id === agentId);
-    if (!agent) return;
+  // Load agents and credentials from Supabase
+  useEffect(() => {
+    loadData();
+  }, []);
 
-    console.log(`Toggling agent ${agent.name} from ${agent.status}`);
-    
+  const loadData = async () => {
     try {
-      // Simulate API call to n8n webhook
+      setLoading(true);
+      
+      // Load credentials
+      const { data: credData, error: credError } = await supabase
+        .from('n8n_credentials')
+        .select('*')
+        .eq('is_active', true);
+
+      if (credError) throw credError;
+      setCredentials(credData || []);
+
+      // Load agents with their credentials
+      const { data: agentData, error: agentError } = await supabase
+        .from('n8n_agents')
+        .select(`
+          *,
+          n8n_credentials (
+            name,
+            base_url
+          )
+        `);
+
+      if (agentError) throw agentError;
+      
+      // Add mock data for demo if no data exists
+      if (!agentData || agentData.length === 0) {
+        setAgents([
+          {
+            id: 1,
+            name: "Zárate Publicidad Panamá",
+            description: "Asistente de atención al cliente para servicios de impresión digital. Maneja consultas sobre productos, cotizaciones y soporte técnico las 24 horas.",
+            status: "running",
+            webhookUrl: "https://n8n.example.com/webhook/zarate-panama",
+            lastTriggered: "2 minutes ago",
+            messagesHandled: 145,
+            tools: ["WhatsApp", "OpenAI GPT-4", "Evolution API", "Postgres", "Webhook"],
+            image: "/api/placeholder/400/240",
+            video: "/api/placeholder/video/demo.mp4",
+            phoneDemo: [
+              { id: 1, content: "Hola 👋 Gracias por escribir a Zárate Publicidad Panamá 🖨", sender: "bot" as const, timestamp: "10:30" },
+              { id: 2, content: "Buenos días, necesito un banner de 3x2 metros", sender: "user" as const, timestamp: "10:31" },
+              { id: 3, content: "Perfecto ✅ Para ayudarte mejor, ¿es para interior o exterior?", sender: "bot" as const, timestamp: "10:31" },
+              { id: 4, content: "Para exterior", sender: "user" as const, timestamp: "10:32" },
+              { id: 5, content: "¡Excelente! Te envío una cotización en breve 📋", sender: "bot" as const, timestamp: "10:32" }
+            ]
+          },
+          {
+            id: 2,
+            name: "Lead Qualification System",
+            description: "Sistema automatizado para calificar leads entrantes. Analiza información de contacto, hace preguntas de calificación y deriva a los vendedores apropiados.",
+            status: "paused",
+            webhookUrl: "https://n8n.example.com/webhook/lead-gen",
+            lastTriggered: "1 hour ago",
+            messagesHandled: 67,
+            tools: ["Google Sheets", "OpenAI GPT-4", "Gmail", "Webhook", "Zapier"],
+            image: "/api/placeholder/400/240",
+            video: "/api/placeholder/video/leads.mp4",
+            phoneDemo: [
+              { id: 1, content: "¡Hola! Veo que estás interesado en nuestros servicios", sender: "bot" as const, timestamp: "14:20" },
+              { id: 2, content: "Sí, me gustaría saber más sobre sus productos", sender: "user" as const, timestamp: "14:21" },
+              { id: 3, content: "¿Cuál es el tamaño de tu empresa?", sender: "bot" as const, timestamp: "14:21" },
+              { id: 4, content: "Somos una empresa mediana, unos 50 empleados", sender: "user" as const, timestamp: "14:22" },
+              { id: 5, content: "Perfecto, te conectaré con nuestro especialista", sender: "bot" as const, timestamp: "14:22" }
+            ]
+          }
+        ]);
+      } else {
+        setAgents(agentData);
+      }
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load agents data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle agent status with Supabase integration
+  const toggleAgent = async (agentId: number | string) => {
+    try {
+      const agent = agents.find(a => a.id === agentId);
+      if (!agent) return;
+
       const newStatus = agent.status === "running" ? "paused" : "running";
       
+      // If it's a real agent from Supabase, update the database
+      if (typeof agentId === 'string') {
+        const { data, error } = await supabase.functions.invoke('n8n-api', {
+          body: {
+            action: newStatus === "running" ? 'activate_workflow' : 'deactivate_workflow',
+            credentialId: agent.credential_id,
+            workflowId: agent.workflow_id
+          }
+        });
+
+        if (error) throw error;
+
+        // Update agent status in database
+        const { error: updateError } = await supabase
+          .from('n8n_agents')
+          .update({ status: newStatus })
+          .eq('id', agentId);
+
+        if (updateError) throw updateError;
+      }
+      
+      // Update local state
       setAgents(prev => prev.map(a => 
         a.id === agentId 
           ? { ...a, status: newStatus, lastTriggered: newStatus === "running" ? "Just now" : a.lastTriggered }
@@ -106,43 +160,69 @@ const Agents = () => {
     }
   };
 
-  const testWebhook = async (agentId: number) => {
+  // Test webhook with Supabase integration
+  const testWebhook = async (agentId: number | string) => {
     const agent = agents.find(a => a.id === agentId);
     if (!agent || !agent.webhookUrl) return;
 
     setWebhookTesting(prev => ({ ...prev, [agentId]: true }));
     
     try {
-      const response = await fetch(agent.webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          test: true,
-          agent_id: agentId,
-          agent_name: agent.name,
-          timestamp: new Date().toISOString(),
-          message: "Prueba de webhook desde la plataforma"
-        }),
-      });
-
-      const success = response.ok;
-      const message = success ? "Webhook activado exitosamente" : `Error: ${response.status} ${response.statusText}`;
+      let response;
       
-      setWebhookResults(prev => ({
-        ...prev,
-        [agentId]: {
-          success,
-          message,
-          timestamp: new Date().toLocaleString()
-        }
-      }));
+      // If it's a real agent from Supabase, use the edge function
+      if (typeof agentId === 'string' && agent.credential_id) {
+        const { data, error } = await supabase.functions.invoke('n8n-api', {
+          body: {
+            action: 'test_webhook',
+            credentialId: agent.credential_id,
+            workflowId: agent.workflow_id,
+            data: { test: true, timestamp: new Date().toISOString() }
+          }
+        });
+
+        if (error) throw error;
+        
+        setWebhookResults(prev => ({ 
+          ...prev, 
+          [agentId]: {
+            success: true,
+            message: "Webhook test completed successfully",
+            timestamp: new Date().toLocaleString()
+          }
+        }));
+      } else {
+        // Mock webhook test for demo agents
+        response = await fetch(agent.webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            test: true,
+            agent_id: agentId,
+            agent_name: agent.name,
+            timestamp: new Date().toISOString(),
+            message: "Prueba de webhook desde la plataforma"
+          }),
+        });
+
+        const success = response.ok;
+        const message = success ? "Webhook activado exitosamente" : `Error: ${response.status} ${response.statusText}`;
+        
+        setWebhookResults(prev => ({
+          ...prev,
+          [agentId]: {
+            success,
+            message,
+            timestamp: new Date().toLocaleString()
+          }
+        }));
+      }
 
       toast({
-        title: success ? "Webhook Exitoso" : "Error en Webhook",
-        description: message,
-        variant: success ? "default" : "destructive",
+        title: "Webhook Test",
+        description: "Webhook test completed",
       });
 
     } catch (error) {
@@ -166,12 +246,39 @@ const Agents = () => {
     }
   };
 
-  const updateWebhookUrl = (agentId: number, newUrl: string) => {
-    setAgents(prev => prev.map(agent => 
-      agent.id === agentId 
-        ? { ...agent, webhookUrl: newUrl }
-        : agent
-    ));
+  // Update webhook URL with Supabase integration
+  const updateWebhookUrl = async (agentId: number | string, newUrl: string) => {
+    try {
+      // If it's a real agent from Supabase, update the database
+      if (typeof agentId === 'string') {
+        const { error } = await supabase
+          .from('n8n_agents')
+          .update({ webhook_url: newUrl })
+          .eq('id', agentId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Webhook URL updated",
+        });
+      }
+
+      // Update local state
+      setAgents(prev => prev.map(agent => 
+        agent.id === agentId 
+          ? { ...agent, webhookUrl: newUrl }
+          : agent
+      ));
+
+    } catch (error) {
+      console.error('Error updating webhook URL:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update webhook URL",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
