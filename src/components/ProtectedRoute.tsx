@@ -1,12 +1,9 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-
+// No authentication required - direct access to all routes
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  // Temporarily bypass authentication for demo purposes
   return <>{children}</>;
 };
 
