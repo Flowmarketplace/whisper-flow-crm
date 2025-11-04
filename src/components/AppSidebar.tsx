@@ -46,28 +46,28 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
-      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium shadow-lg" 
-      : "hover:bg-slate-800/50 text-slate-300 hover:text-white transition-all duration-200";
+      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium shadow-lg" 
+      : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-primary transition-all duration-200";
 
   return (
-    <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-slate-900 border-r border-slate-800`}>
+    <Sidebar className={`${collapsed ? "w-16" : "w-64"} bg-sidebar border-r border-sidebar-border`}>
       <SidebarContent className="p-2">
         <div className="mb-8 px-3">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+              <Activity className="w-4 h-4 text-primary-foreground" />
             </div>
             {!collapsed && (
               <div>
-                <h2 className="text-white font-bold text-lg">n8n CRM</h2>
-                <p className="text-slate-400 text-xs">Control Panel</p>
+                <h2 className="text-sidebar-foreground font-bold text-lg">n8n CRM</h2>
+                <p className="text-muted-foreground text-xs">Control Panel</p>
               </div>
             )}
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider mb-2">
+          <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider mb-2">
             {!collapsed && "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -90,10 +90,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-slate-800 p-4">
+      <SidebarFooter className="border-t border-sidebar-border p-4">
         {!collapsed && (
           <>
-            <div className="flex items-center gap-2 mb-2 text-slate-300">
+            <div className="flex items-center gap-2 mb-2 text-sidebar-foreground">
               <User size={16} />
               <span className="text-sm truncate">{user?.email}</span>
             </div>
@@ -101,7 +101,7 @@ export function AppSidebar() {
               variant="outline" 
               size="sm" 
               onClick={signOut}
-              className="w-full border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800"
+              className="w-full border-sidebar-border text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent"
             >
               <LogOut size={16} className="mr-2" />
               Cerrar Sesión
@@ -113,7 +113,7 @@ export function AppSidebar() {
             variant="outline" 
             size="sm" 
             onClick={signOut}
-            className="w-full border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 p-2"
+            className="w-full border-sidebar-border text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent p-2"
           >
             <LogOut size={16} />
           </Button>
